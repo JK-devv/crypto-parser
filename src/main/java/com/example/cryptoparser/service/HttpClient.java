@@ -6,17 +6,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
 public class HttpClient {
+    private static final String URL = "https://cex.io/api/last_price/{param}/USD";
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -29,14 +33,18 @@ public class HttpClient {
         Currency[] values = Currency.values();
         List<ApiResponseCurrencyInfo> apiResponseCurrencyInfos = new ArrayList<>();
         for (Currency currency : values) {
-            String url = String.format("https://cex.io/api/last_price/%s/USD", currency);
-            HttpGet request = new HttpGet(url);
+
+            Map<String, String> params = new HashMap<>();
+            params.put("param", currency.name());
+            String uriString = UriComponentsBuilder.fromUriString(URL)
+                    .buildAndExpand(params).toUriString();
+            HttpGet request = new HttpGet(uriString);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
                 apiResponseCurrencyInfos.add(objectMapper.readValue(
                         response.getEntity().getContent(),
                         ApiResponseCurrencyInfo.class));
             } catch (IOException e) {
-                throw new RuntimeException("Can`t fetch into from URL " + url);
+                throw new RuntimeException("Can`t fetch into from URL " + uriString);
             }
         }
         return apiResponseCurrencyInfos;
