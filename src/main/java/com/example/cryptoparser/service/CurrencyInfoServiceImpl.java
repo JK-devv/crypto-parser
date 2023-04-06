@@ -1,14 +1,12 @@
 package com.example.cryptoparser.service;
 
-import com.example.cryptoparser.model.Currency;
 import com.example.cryptoparser.model.CurrencyInfo;
-import com.example.cryptoparser.model.dto.ResponseCurrencyInfoDto;
+import com.example.cryptoparser.model.dto.CurrencyInfoResponseDto;
 import com.example.cryptoparser.model.mapper.CurrencyInfoMapper;
 import com.example.cryptoparser.repository.CurrencyInfoRepository;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,50 +20,57 @@ public class CurrencyInfoServiceImpl implements CurrencyInfoService {
     private final HttpClient client;
 
     @Override
-    public CurrencyInfo getCurrencyInfoWithMinLastPrice(
+    public CurrencyInfo getWithMinLastPrice(
             String currencyMain) {
         return repository
-                .findTopByCurrencyMainOrderByLastPrice(currencyMain);
+                .findTopByCurrencyNameOrderByLastPrice(currencyMain);
     }
 
     @Override
-    public CurrencyInfo getCurrencyInfoWithMaxLastPrice(
+    public CurrencyInfo getWithMaxLastPrice(
             String currencyMain) {
         return repository
-                .findTopByCurrencyMainOrderByLastPriceDesc(currencyMain);
+                .findTopByCurrencyNameOrderByLastPriceDesc(currencyMain);
     }
 
     @Override
-    public List<CurrencyInfo> getByCurrencyMainName(
-            String currencyMain, PageRequest pageRequest) {
+    public List<CurrencyInfo> getByCurrencyName(
+            String currencyName, PageRequest pageRequest) {
         return repository
-                .findByCurrencyMain(currencyMain, pageRequest);
+                .findByCurrencyName(currencyName, pageRequest);
     }
 
     @Override
     @PostConstruct
     @Scheduled(cron = "*/10 * * * * *")
     public void save() {
-        repository.saveAll(client.getInfoFromApi()
-                .stream()
+        repository.saveAll(client.getInfoFromApi().stream()
                 .map(mapper::mapToModel)
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     @Override
-    public List<ResponseCurrencyInfoDto> getReport() {
-        List<ResponseCurrencyInfoDto> result = new ArrayList<>();
-        Currency[] currencies = Currency.values();
-        for (Currency currency : currencies) {
-            CurrencyInfo maxLastPrice = repository
-                    .findTopByCurrencyMainOrderByLastPriceDesc(currency.name());
-            CurrencyInfo minLastPrice = repository
-                    .findTopByCurrencyMainOrderByLastPrice(currency.name());
-            result.add(ResponseCurrencyInfoDto.builder()
-                    .currency(currency.name())
-                    .maxPrice(maxLastPrice.getLastPrice())
-                    .minPrice(minLastPrice.getLastPrice())
-                    .build());
+    public List<CurrencyInfoResponseDto> getReport() {
+        List<CurrencyInfoResponseDto> result = new ArrayList<>();
+        List<CurrencyInfo> minLastPrice = repository.findWithMinLastPrice()
+                .stream()
+                .map(mapper::mapToModel)
+                .toList();
+        List<CurrencyInfo> maxLastPrice = repository.findWithMaxLastPrice()
+                .stream()
+                .map(mapper::mapToModel)
+                .toList();
+
+        for (CurrencyInfo currencyInfo : minLastPrice) {
+            CurrencyInfoResponseDto responseDto = new CurrencyInfoResponseDto();
+            responseDto.setCurrency(currencyInfo.getCurrencyName().name());
+            responseDto.setMinPrice(currencyInfo.getLastPrice());
+            for (CurrencyInfo info : maxLastPrice) {
+                if (currencyInfo.getCurrencyName().equals(info.getCurrencyName())) {
+                    responseDto.setMaxPrice(info.getLastPrice());
+                }
+            }
+            result.add(responseDto);
         }
         return result;
     }

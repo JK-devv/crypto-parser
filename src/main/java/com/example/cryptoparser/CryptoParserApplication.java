@@ -11,5 +11,4 @@ public class CryptoParserApplication {
     public static void main(String[] args) {
         SpringApplication.run(CryptoParserApplication.class, args);
     }
-
 }

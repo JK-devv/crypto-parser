@@ -7,8 +7,9 @@ import static org.mockito.Mockito.when;
 
 import com.example.cryptoparser.model.Currency;
 import com.example.cryptoparser.model.CurrencyInfo;
-import com.example.cryptoparser.model.dto.ApiResponseCurrencyInfo;
-import com.example.cryptoparser.model.dto.ResponseCurrencyInfoDto;
+import com.example.cryptoparser.model.dto.CurrencyInfoAggregate;
+import com.example.cryptoparser.model.dto.CurrencyInfoApiDto;
+import com.example.cryptoparser.model.dto.CurrencyInfoResponseDto;
 import com.example.cryptoparser.model.mapper.CurrencyInfoMapper;
 import com.example.cryptoparser.repository.CurrencyInfoRepository;
 import java.util.ArrayList;
@@ -36,143 +37,143 @@ class CurrencyInfoServiceImplTest {
     @Test
     void getCurrencyInfoWithMinLastPrice() {
         CurrencyInfo expectedBtc = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
+                .currencyName(Currency.BTC)
                 .lastPrice(23740.7)
                 .build();
         CurrencyInfo expectedEth = CurrencyInfo.builder()
-                .currencyMain(Currency.ETH)
+                .currencyName(Currency.ETH)
                 .lastPrice(1614.0)
                 .build();
         CurrencyInfo expectedXrp = CurrencyInfo.builder()
-                .currencyMain(Currency.XRP)
+                .currencyName(Currency.XRP)
                 .lastPrice(0.39008)
                 .build();
 
-        when(repository.findTopByCurrencyMainOrderByLastPrice("BTC"))
+        when(repository.findTopByCurrencyNameOrderByLastPrice("BTC"))
                 .thenReturn(expectedBtc);
-        when(repository.findTopByCurrencyMainOrderByLastPrice("ETH"))
+        when(repository.findTopByCurrencyNameOrderByLastPrice("ETH"))
                 .thenReturn(expectedEth);
-        when(repository.findTopByCurrencyMainOrderByLastPrice("XRP"))
+        when(repository.findTopByCurrencyNameOrderByLastPrice("XRP"))
                 .thenReturn(expectedXrp);
 
         CurrencyInfo actualBtc =
-                service.getCurrencyInfoWithMinLastPrice("BTC");
+                service.getWithMinLastPrice("BTC");
         CurrencyInfo actualEth =
-                service.getCurrencyInfoWithMinLastPrice("ETH");
+                service.getWithMinLastPrice("ETH");
         CurrencyInfo actualXrp =
-                service.getCurrencyInfoWithMinLastPrice("XRP");
+                service.getWithMinLastPrice("XRP");
 
         Assertions.assertEquals(expectedBtc.getLastPrice(), actualBtc.getLastPrice());
         Assertions.assertEquals(expectedEth.getLastPrice(), actualEth.getLastPrice());
         Assertions.assertEquals(expectedXrp.getLastPrice(), actualXrp.getLastPrice());
 
         verify(repository, times(3))
-                .findTopByCurrencyMainOrderByLastPrice(any());
+                .findTopByCurrencyNameOrderByLastPrice(any());
     }
 
     @Test
     void getCurrencyInfoWithMaxLastPrice() {
         CurrencyInfo expectedBtc = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
+                .currencyName(Currency.BTC)
                 .lastPrice(24738.6)
                 .build();
         CurrencyInfo expectedEth = CurrencyInfo.builder()
-                .currencyMain(Currency.ETH)
+                .currencyName(Currency.ETH)
                 .lastPrice(1684.28)
                 .build();
         CurrencyInfo expectedXrp = CurrencyInfo.builder()
-                .currencyMain(Currency.XRP)
+                .currencyName(Currency.XRP)
                 .lastPrice(0.39389)
                 .build();
 
-        when(repository.findTopByCurrencyMainOrderByLastPriceDesc("BTC"))
+        when(repository.findTopByCurrencyNameOrderByLastPriceDesc("BTC"))
                 .thenReturn(expectedBtc);
-        when(repository.findTopByCurrencyMainOrderByLastPriceDesc("ETH"))
+        when(repository.findTopByCurrencyNameOrderByLastPriceDesc("ETH"))
                 .thenReturn(expectedEth);
-        when(repository.findTopByCurrencyMainOrderByLastPriceDesc("XRP"))
+        when(repository.findTopByCurrencyNameOrderByLastPriceDesc("XRP"))
                 .thenReturn(expectedXrp);
 
         CurrencyInfo actualBtc =
-                service.getCurrencyInfoWithMaxLastPrice("BTC");
+                service.getWithMaxLastPrice("BTC");
         CurrencyInfo actualEth =
-                service.getCurrencyInfoWithMaxLastPrice("ETH");
+                service.getWithMaxLastPrice("ETH");
         CurrencyInfo actualXrp =
-                service.getCurrencyInfoWithMaxLastPrice("XRP");
+                service.getWithMaxLastPrice("XRP");
 
         Assertions.assertEquals(expectedBtc.getLastPrice(), actualBtc.getLastPrice());
         Assertions.assertEquals(expectedEth.getLastPrice(), actualEth.getLastPrice());
         Assertions.assertEquals(expectedXrp.getLastPrice(), actualXrp.getLastPrice());
 
         verify(repository, times(3))
-                .findTopByCurrencyMainOrderByLastPriceDesc(any());
+                .findTopByCurrencyNameOrderByLastPriceDesc(any());
     }
 
     @Test
     void getByCurrencyMainName() {
         List<CurrencyInfo> expected = new ArrayList<>();
         CurrencyInfo currencyInfo1 = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
+                .currencyName(Currency.BTC)
                 .lastPrice(23740.7)
                 .build();
         CurrencyInfo currencyInfo2 = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
+                .currencyName(Currency.BTC)
                 .lastPrice(24006.5)
                 .build();
         CurrencyInfo currencyInfo3 = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
+                .currencyName(Currency.BTC)
                 .lastPrice(24573.7)
                 .build();
         expected.add(currencyInfo1);
         expected.add(currencyInfo2);
         expected.add(currencyInfo3);
 
-        when(repository.findByCurrencyMain("BTC",
+        when(repository.findByCurrencyName("BTC",
                 PageRequest.of(0, 3)))
                 .thenReturn(expected);
         List<CurrencyInfo> actual = service
-                .getByCurrencyMainName("BTC",
+                .getByCurrencyName("BTC",
                         PageRequest.of(0, 3));
 
         Assertions.assertEquals(expected.size(), actual.size());
         Assertions.assertEquals(expected.get(0), actual.get(0));
 
         verify(repository, times(1))
-                .findByCurrencyMain(any(), any());
+                .findByCurrencyName(any(), any());
     }
 
     @Test
     void save() {
-        List<ApiResponseCurrencyInfo> responseCurrencyInfos =
+        List<CurrencyInfoApiDto> responseCurrencyInfos =
                 new ArrayList<>();
-        ApiResponseCurrencyInfo apiResponseCurrencyInfo =
-                ApiResponseCurrencyInfo.builder()
-                .currencyMain("BTC")
-                .price(24738.5)
-                .build();
-        ApiResponseCurrencyInfo apiResponseCurrencyInfo1 =
-                ApiResponseCurrencyInfo.builder()
-                .currencyMain("ETH")
-                .price(1684.28)
-                .build();
-        ApiResponseCurrencyInfo apiResponseCurrencyInfo2 =
-                ApiResponseCurrencyInfo.builder()
-                .currencyMain("XRP")
-                .price(0.39389)
-                .build();
-        responseCurrencyInfos.add(apiResponseCurrencyInfo2);
-        responseCurrencyInfos.add(apiResponseCurrencyInfo1);
-        responseCurrencyInfos.add(apiResponseCurrencyInfo);
+        CurrencyInfoApiDto currencyInfoApiDto =
+                CurrencyInfoApiDto.builder()
+                        .currency("BTC")
+                        .price(24738.5)
+                        .build();
+        CurrencyInfoApiDto currencyInfoApiDto1 =
+                CurrencyInfoApiDto.builder()
+                        .currency("ETH")
+                        .price(1684.28)
+                        .build();
+        CurrencyInfoApiDto currencyInfoApiDto2 =
+                CurrencyInfoApiDto.builder()
+                        .currency("XRP")
+                        .price(0.39389)
+                        .build();
+        responseCurrencyInfos.add(currencyInfoApiDto2);
+        responseCurrencyInfos.add(currencyInfoApiDto1);
+        responseCurrencyInfos.add(currencyInfoApiDto);
         List<CurrencyInfo> saved = new ArrayList<>();
         CurrencyInfo btc = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
+                .currencyName(Currency.BTC)
                 .lastPrice(24738.5)
                 .build();
         CurrencyInfo xrp = CurrencyInfo.builder()
-                .currencyMain(Currency.XRP)
+                .currencyName(Currency.XRP)
                 .lastPrice(0.39389)
                 .build();
         CurrencyInfo eth = CurrencyInfo.builder()
-                .currencyMain(Currency.ETH)
+                .currencyName(Currency.ETH)
                 .lastPrice(1684.28)
                 .build();
         saved.add(btc);
@@ -180,64 +181,63 @@ class CurrencyInfoServiceImplTest {
         saved.add(xrp);
         when(repository.saveAll(any())).thenReturn(saved);
         when(client.getInfoFromApi()).thenReturn(responseCurrencyInfos);
-        when(mapper.mapToModel(any())).thenCallRealMethod();
+        when(mapper.mapToModel(any(CurrencyInfoApiDto.class))).thenCallRealMethod();
         service.save();
         verify(repository, times(1)).saveAll(any());
         verify(client, times(1)).getInfoFromApi();
-        verify(mapper, times(3)).mapToModel(any());
+        verify(mapper, times(3)).mapToModel(any(CurrencyInfoApiDto.class));
     }
 
     @Test
     void getReport() {
-        CurrencyInfo btcMax = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
-                .lastPrice(24738.6)
+        CurrencyInfoAggregate btcMax = CurrencyInfoAggregate.builder()
+                .id(Currency.BTC.name())
+                .price(24738.6)
                 .build();
-        CurrencyInfo btcMin = CurrencyInfo.builder()
-                .currencyMain(Currency.BTC)
-                .lastPrice(23740.7)
+        CurrencyInfoAggregate ethMax = CurrencyInfoAggregate.builder()
+                .id(Currency.ETH.name())
+                .price(1684.28)
                 .build();
+        CurrencyInfoAggregate xrpMax = CurrencyInfoAggregate.builder()
+                .id(Currency.XRP.name())
+                .price(0.39389)
+                .build();
+        List<CurrencyInfoAggregate> max = new ArrayList<>();
+        max.add(btcMax);
+        max.add(ethMax);
+        max.add(xrpMax);
+        CurrencyInfoAggregate btcMin = CurrencyInfoAggregate.builder()
+                .id(Currency.BTC.name())
+                .price(23740.7)
+                .build();
+        CurrencyInfoAggregate ethMin = CurrencyInfoAggregate.builder()
+                .id(Currency.ETH.name())
+                .price(1614.0)
+                .build();
+        CurrencyInfoAggregate xrpMin = CurrencyInfoAggregate.builder()
+                .id(Currency.XRP.name())
+                .price(0.39008)
+                .build();
+        List<CurrencyInfoAggregate> min = new ArrayList<>();
+        min.add(xrpMin);
+        min.add(ethMin);
+        min.add(btcMin);
 
-        CurrencyInfo ethMax = CurrencyInfo.builder()
-                .currencyMain(Currency.ETH)
-                .lastPrice(1684.28)
-                .build();
-        CurrencyInfo ethMin = CurrencyInfo.builder()
-                .currencyMain(Currency.ETH)
-                .lastPrice(1614.0)
-                .build();
-        CurrencyInfo xrpMax = CurrencyInfo.builder()
-                .currencyMain(Currency.XRP)
-                .lastPrice(0.39389)
-                .build();
-        CurrencyInfo xrpMin = CurrencyInfo.builder()
-                .currencyMain(Currency.XRP)
-                .lastPrice(0.39008)
-                .build();
+        when(repository.findWithMaxLastPrice()).thenReturn(max);
+        when(repository.findWithMinLastPrice()).thenReturn(min);
+        when(mapper.mapToModel(any(CurrencyInfoAggregate.class))).thenCallRealMethod();
 
-        when(repository.findTopByCurrencyMainOrderByLastPriceDesc("BTC"))
-                .thenReturn(btcMax);
-        when(repository.findTopByCurrencyMainOrderByLastPrice("BTC"))
-                .thenReturn(btcMin);
-        when(repository.findTopByCurrencyMainOrderByLastPriceDesc("ETH"))
-                .thenReturn(ethMax);
-        when(repository.findTopByCurrencyMainOrderByLastPrice("ETH"))
-                .thenReturn(ethMin);
-        when(repository.findTopByCurrencyMainOrderByLastPrice("XRP"))
-                .thenReturn(xrpMin);
-        when(repository.findTopByCurrencyMainOrderByLastPriceDesc("XRP"))
-                .thenReturn(xrpMax);
-
-        List<ResponseCurrencyInfoDto> report = service.getReport();
+        List<CurrencyInfoResponseDto> report = service.getReport();
         Assertions.assertNotNull(report);
-        Assertions.assertEquals(report.get(0).getCurrency(), "BTC");
-        Assertions.assertEquals(report.get(0).getMaxPrice(), 24738.6);
-        Assertions.assertEquals(report.get(0).getMinPrice(), 23740.7);
+        Assertions.assertEquals(report.get(0).getCurrency(), "XRP");
+        Assertions.assertEquals(report.get(0).getMaxPrice(), 0.39389);
+        Assertions.assertEquals(report.get(0).getMinPrice(), 0.39008);
 
-        verify(repository, times(3))
-                .findTopByCurrencyMainOrderByLastPrice(any());
-        verify(repository, times(3))
-                .findTopByCurrencyMainOrderByLastPriceDesc(any());
-
+        verify(repository, times(1))
+                .findWithMinLastPrice();
+        verify(repository, times(1))
+                .findWithMaxLastPrice();
+        verify(mapper, times(6))
+                .mapToModel(any(CurrencyInfoAggregate.class));
     }
 }

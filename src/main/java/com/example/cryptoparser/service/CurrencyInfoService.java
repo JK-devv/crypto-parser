@@ -1,19 +1,19 @@
 package com.example.cryptoparser.service;
 
 import com.example.cryptoparser.model.CurrencyInfo;
-import com.example.cryptoparser.model.dto.ResponseCurrencyInfoDto;
+import com.example.cryptoparser.model.dto.CurrencyInfoResponseDto;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 
 public interface CurrencyInfoService {
-    CurrencyInfo getCurrencyInfoWithMinLastPrice(String currencyMainName);
+    CurrencyInfo getWithMinLastPrice(String currencyMainName);
 
-    CurrencyInfo getCurrencyInfoWithMaxLastPrice(String currencyMainName);
+    CurrencyInfo getWithMaxLastPrice(String currencyMainName);
 
-    List<CurrencyInfo> getByCurrencyMainName(String currencyMainName, PageRequest pageRequest);
+    List<CurrencyInfo> getByCurrencyName(String currencyName, PageRequest pageRequest);
 
     void save();
 
-    List<ResponseCurrencyInfoDto> getReport();
+    List<CurrencyInfoResponseDto> getReport();
 
 }

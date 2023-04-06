@@ -9,7 +9,7 @@ group = "com.example"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
-checkstyle{
+checkstyle {
     toolVersion = "10.3.1"
     configFile = file("checkstyle.xml")
 }
@@ -29,6 +29,7 @@ dependencies {
     implementation("net.sf.supercsv:super-csv:2.4.0")
     implementation("com.puppycrawl.tools:checkstyle:10.3.1")
     implementation("org.apache.httpcomponents:httpclient:4.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ApiResponseCurrencyInfo {
+public class CurrencyInfoApiDto {
     @JsonProperty(value = "curr1")
-    private String currencyMain;
+    private String currency;
     @JsonProperty(value = "lprice")
     private Double price;
 }

@@ -1,8 +1,7 @@
 package com.example.cryptoparser.service;
 
 import com.example.cryptoparser.model.Currency;
-import com.example.cryptoparser.model.dto.ApiResponseCurrencyInfo;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.example.cryptoparser.model.dto.CurrencyInfoApiDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,40 +12,35 @@ import lombok.RequiredArgsConstructor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
 public class HttpClient {
-    private static final String URL = "https://cex.io/api/last_price/{param}/USD";
-    private final CloseableHttpClient httpClient = HttpClients.createDefault();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${url}")
+    private String url;
+    private final CloseableHttpClient httpClient;
+    private final ObjectMapper objectMapper;
 
-    {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
-    public List<ApiResponseCurrencyInfo> getInfoFromApi() {
-
+    public List<CurrencyInfoApiDto> getInfoFromApi() {
         Currency[] values = Currency.values();
-        List<ApiResponseCurrencyInfo> apiResponseCurrencyInfos = new ArrayList<>();
+        List<CurrencyInfoApiDto> currencyInfoApiDtos = new ArrayList<>();
         for (Currency currency : values) {
-
             Map<String, String> params = new HashMap<>();
             params.put("param", currency.name());
-            String uriString = UriComponentsBuilder.fromUriString(URL)
+            String uriString = UriComponentsBuilder.fromUriString(url)
                     .buildAndExpand(params).toUriString();
             HttpGet request = new HttpGet(uriString);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
-                apiResponseCurrencyInfos.add(objectMapper.readValue(
+                currencyInfoApiDtos.add(objectMapper.readValue(
                         response.getEntity().getContent(),
-                        ApiResponseCurrencyInfo.class));
+                        CurrencyInfoApiDto.class));
             } catch (IOException e) {
                 throw new RuntimeException("Can`t fetch into from URL " + uriString);
             }
         }
-        return apiResponseCurrencyInfos;
+        return currencyInfoApiDtos;
     }
 }

@@ -5,12 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class ResponseCurrencyInfoDto {
-    private String currency;
-    private Double maxPrice;
-    private Double minPrice;
+@Data
+public class CurrencyInfoAggregate {
+    private String id;
+    private Double price;
 }
